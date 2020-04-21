@@ -1,0 +1,23 @@
+kind: pipeline
+name: Candy
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: ONE STEP TO THE SKY
+    environment:
+      GITID:
+        from_secret: GITID
+      GITPWD:
+        from_secret: GITPWD
+    image: ubuntu:20.04
+    commands:
+      - apt-get update && apt-get install -y git ca-certificates --no-install-recommends
+      - git clone https://$GITID:$GITPWD@github.com/$(cat /drone/src/repo) -b $(cat /drone/src/branch) --depth=1 KERNEL
+      - cd KERNEL
+      - bash ci/launch.sh
