@@ -1,0 +1,29 @@
+kind: pipeline
+type: docker
+name: Candy Kernel CI
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  depth: 1
+
+steps:
+  - name: Download & Build
+    environment:
+      GITID:
+        from_secret: GITID
+      GITPWD:
+        from_secret: GITPWD
+    image: pikachuhan/pikachu-ci:latest
+    commands:
+      - cd /drone
+      - apt install -y python cpio openssl libssl-dev liblz4-dev zipalign p7zip liblz4-tool liblz4-1 make bc curl git zip zstd flex bison libc6 libstdc++6 libgnutls30
+      - git clone https://github.com/rsyhan/Xinyu-Clang -b toolchain --depth=1 Clang-LLVM-Toolchain
+      - git clone https://$GITID:$GITPWD@github.com/wloot/SM8150-MI -b SEXY-WLOOT --depth=1 kernel-source
+      - git clone https://github.com/wloot/AnyKernel2 -b raphael --depth=1 AnyKernel
+      - cd /drone/kernel-source
+      - git submodule init && git submodule update
+      - bash build_ci.sh
+      - bash upload_ci.sh
